@@ -1,3 +1,4 @@
+
 name: Build PhoneVR APK
 
 on:
@@ -14,44 +15,49 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
     steps:
-      - name: Download project
+      - name: Checkout project
         uses: actions/checkout@v4
 
-      - name: Install Java 17
+      - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
 
-      - name: Install Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Check Android SDK
+        run: |
+          echo "Checking Android SDK..."
+          ls -la "$ANDROID_HOME"
+          echo "Installed Android platforms:"
+          ls "$ANDROID_HOME/platforms" || true
+          echo "Installed build tools:"
+          ls "$ANDROID_HOME/build-tools" || true
 
-      - name: Accept Android SDK licences
-        run: yes | sdkmanager --licenses || true
+      - name: Accept Android licences
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
-      - name: Install Gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
-      - name: Check project files
+      - name: Check project structure
         run: |
-          echo "Checking project structure..."
+          echo "Project files:"
           ls -la
-          echo "Checking Android app folder..."
-          ls -la app || true
+          echo "App folder:"
+          ls -la app
 
-      - name: Build PhoneVR APK
-        run: |
-          if [ -f "./gradlew" ]; then
-            chmod +x ./gradlew
-            ./gradlew assembleDebug
-          else
-            gradle assembleDebug
-          fi
+      - name: Build APK
+        run: gradle assembleDebug
 
-      - name: Upload PhoneVR APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: PhoneVR-APK
