@@ -1,4 +1,3 @@
-
 name: Build PhoneVR APK
 
 on:
@@ -29,16 +28,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Check Android SDK
-        run: |
-          echo "Checking Android SDK..."
-          ls -la "$ANDROID_HOME"
-          echo "Installed Android platforms:"
-          ls "$ANDROID_HOME/platforms" || true
-          echo "Installed build tools:"
-          ls "$ANDROID_HOME/build-tools" || true
-
-      - name: Accept Android licences
+      - name: Accept Android licenses
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
@@ -49,18 +39,18 @@ jobs:
 
       - name: Check project structure
         run: |
-          echo "Project files:"
           ls -la
-          echo "App folder:"
-          ls -la app
+          ls -la PhoneVRGame/PhoneVRGame
+          ls -la PhoneVRGame/PhoneVRGame/app
 
       - name: Build APK
+        working-directory: PhoneVRGame/PhoneVRGame
         run: gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: PhoneVR-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: PhoneVRGame/PhoneVRGame/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 7
